@@ -75,6 +75,25 @@ ffbuild_dockerbuild() {
     export AR="${AR/${FFBUILD_CROSS_PREFIX}/}"
     export RANLIB="${RANLIB/${FFBUILD_CROSS_PREFIX}/}"
 
+    # OpenCV için pkg-config desteği ekliyoruz
+    echo "prefix=$FFBUILD_PREFIX" > "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "exec_prefix=\${prefix}" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "libdir=\${exec_prefix}/lib" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "includedir=\${prefix}/include" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "Name: OpenCV" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "Description: OpenCV - Open Source Computer Vision Library" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "Version: 9999" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "Cflags: -I\${includedir}" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    
+    # Platform bazlı linkleme ayarları
+    if [[ $TARGET == linux* ]]; then
+        echo "Libs: -L\${libdir} -lopencv_core -lopencv_imgproc -lopencv_highgui" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    elif [[ $TARGET == win* ]]; then
+        echo "Libs: -L\${libdir} -lopencv_core -lopencv_imgproc -lopencv_highgui" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+        echo "Libs.private: -l:opencv_core.a -l:opencv_imgproc.a -l:opencv_highgui.a" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    fi
+    
     # Build dizini oluştur
     mkdir -p build
     cd build
