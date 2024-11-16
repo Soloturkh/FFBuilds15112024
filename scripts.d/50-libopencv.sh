@@ -36,34 +36,26 @@ ffbuild_dockerbuild() {
     )
 
     # Platform bazlı hedef yapılandırmaları ekleyelim
-    if [[ $TARGET == win64 ]]; then
-        myconf+=(
-            -DCMAKE_SYSTEM_NAME=Windows
-            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-        )
-    elif [[ $TARGET == win32 ]]; then
-        myconf+=(
-            -DCMAKE_SYSTEM_NAME=Windows
-            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-        )
-    elif [[ $TARGET == linux64 ]]; then
-        myconf+=(
-            -DCMAKE_SYSTEM_NAME=Linux
-            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-        )
-    elif [[ $TARGET == linuxarm64 ]]; then
-        myconf+=(
-            -DCMAKE_SYSTEM_NAME=Linux
-            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-        )
-    else
-        echo "Unknown target: $TARGET"
-        return -1
-    fi
+    case "$TARGET" in
+        win64|win32)
+            myconf+=(
+                -DCMAKE_SYSTEM_NAME=Windows
+                -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+                -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
+            )
+            ;;
+        linux64|linuxarm64)
+            myconf+=(
+                -DCMAKE_SYSTEM_NAME=Linux
+                -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+                -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
+            )
+            ;;
+        *)
+            echo "Unknown target: $TARGET"
+            return 1
+            ;;
+    esac
 
     # Derleme ayarları
     export CFLAGS="$CFLAGS -fno-strict-aliasing"
@@ -76,24 +68,21 @@ ffbuild_dockerbuild() {
     export RANLIB="${RANLIB/${FFBUILD_CROSS_PREFIX}/}"
 
     # OpenCV için pkg-config desteği ekliyoruz
-    echo "prefix=$FFBUILD_PREFIX" > "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    echo "exec_prefix=\${prefix}" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    echo "libdir=\${exec_prefix}/lib" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    echo "includedir=\${prefix}/include" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    echo >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    echo "Name: OpenCV" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    echo "Description: OpenCV - Open Source Computer Vision Library" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    echo "Version: 9999" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    echo "Cflags: -I\${includedir}" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    
-    # Platform bazlı linkleme ayarları
-    if [[ $TARGET == linux* ]]; then
-        echo "Libs: -L\${libdir} -lopencv_core -lopencv_imgproc -lopencv_highgui" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    elif [[ $TARGET == win* ]]; then
-        echo "Libs: -L\${libdir} -lopencv_core -lopencv_imgproc -lopencv_highgui" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-        echo "Libs.private: -l:opencv_core.a -l:opencv_imgproc.a -l:opencv_highgui.a" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
-    fi
-    
+    PKG_CONFIG_PATH="$FFBUILD_PREFIX/lib/pkgconfig"
+    mkdir -p "$PKG_CONFIG_PATH"
+    cat > "$PKG_CONFIG_PATH/opencv.pc" <<EOF
+prefix=$FFBUILD_PREFIX
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: OpenCV
+Description: OpenCV - Open Source Computer Vision Library
+Version: 9999
+Cflags: -I\${includedir}
+Libs: -L\${libdir} -lopencv_core -lopencv_imgproc -lopencv_highgui
+EOF
+
     # Build dizini oluştur
     mkdir -p build
     cd build
