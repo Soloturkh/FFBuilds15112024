@@ -30,6 +30,8 @@ ffbuild_dockerbuild() {
         -DWITH_PROTOBUF=OFF
         -DENABLE_CXX11=ON
         -DBUILD_PKG_CONFIG=ON
+        -DOPENCV_ENABLE_PKG_CONFIG=ON  # pkg-config desteğini etkinleştiriyoruz
+        -DOPENCV_GENERATE_PKGCONFIG=ON  # opencv.pc dosyasının oluşturulmasını sağlıyoruz
         -DCMAKE_TOOLCHAIN_FILE="$FFBUILD_CMAKE_TOOLCHAIN"
     )
 
