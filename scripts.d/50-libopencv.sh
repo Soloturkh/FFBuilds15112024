@@ -18,44 +18,44 @@ ffbuild_dockerdl() {
 ffbuild_dockerbuild() {
     # OpenCV için yapılandırma seçeneklerini belirleyelim
     local myconf=(
-        --disable-cli
-        --enable-static
-        --enable-pic
-        --disable-avs
-        --disable-swscale
-        --disable-lavf
-        --disable-ffms
-        --disable-gpac
-        --disable-lsmash
-        --extra-asflags="-w-macro-params-legacy"
-        --extra-cflags="-Wno-error=incompatible-pointer-types"
-        --prefix="$FFBUILD_PREFIX"
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_INSTALL_PREFIX="$FFBUILD_PREFIX"
+        -DBUILD_SHARED_LIBS=OFF
+        -DBUILD_EXAMPLES=OFF
+        -DBUILD_TESTS=OFF
+        -DBUILD_PERF_TESTS=OFF
+        -DWITH_FFMPEG=ON
+        -DWITH_OPENMP=ON
+        -DWITH_IPP=OFF
+        -DWITH_PROTOBUF=OFF
+        -DENABLE_CXX11=ON
+        -DCMAKE_TOOLCHAIN_FILE="$FFBUILD_CMAKE_TOOLCHAIN"
     )
 
     # Platform bazlı hedef yapılandırmaları ekleyelim
     if [[ $TARGET == win64 ]]; then
         myconf+=(
-            --host="$FFBUILD_TOOLCHAIN"
-            --cross-prefix="$FFBUILD_CROSS_PREFIX"
-            mingw64
+            -DCMAKE_SYSTEM_NAME=Windows
+            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
         )
     elif [[ $TARGET == win32 ]]; then
         myconf+=(
-            --host="$FFBUILD_TOOLCHAIN"
-            --cross-prefix="$FFBUILD_CROSS_PREFIX"
-            mingw
+            -DCMAKE_SYSTEM_NAME=Windows
+            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
         )
     elif [[ $TARGET == linux64 ]]; then
         myconf+=(
-            --host="$FFBUILD_TOOLCHAIN"
-            --cross-prefix="$FFBUILD_CROSS_PREFIX"
-            linux-x86_64
+            -DCMAKE_SYSTEM_NAME=Linux
+            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
         )
     elif [[ $TARGET == linuxarm64 ]]; then
         myconf+=(
-            --host="$FFBUILD_TOOLCHAIN"
-            --cross-prefix="$FFBUILD_CROSS_PREFIX"
-            linux-aarch64
+            -DCMAKE_SYSTEM_NAME=Linux
+            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
         )
     else
         echo "Unknown target: $TARGET"
@@ -72,11 +72,12 @@ ffbuild_dockerbuild() {
     export AR="${AR/${FFBUILD_CROSS_PREFIX}/}"
     export RANLIB="${RANLIB/${FFBUILD_CROSS_PREFIX}/}"
 
-    # Yapılandırma komutu
-    ./configure "${myconf[@]}"
+    # Build dizini oluştur
+    mkdir -p build
+    cd build
 
-    # Makefile'de CFLAGS ve LDFLAGS ayarlamalarını yapalım
-    sed -i -e "/^CFLAGS=/s|=.*|=${CFLAGS}|" -e "/^LDFLAGS=/s|=[[:space:]]*$|=${LDFLAGS}|" Makefile
+    # CMake ile yapılandırma işlemi
+    cmake .. "${myconf[@]}"
 
     # Derleme ve yükleme işlemleri
     make -j$(nproc)
