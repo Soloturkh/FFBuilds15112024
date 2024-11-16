@@ -29,6 +29,7 @@ ffbuild_dockerbuild() {
         -DWITH_IPP=OFF
         -DWITH_PROTOBUF=OFF
         -DENABLE_CXX11=ON
+        -DBUILD_PKG_CONFIG=ON
         -DCMAKE_TOOLCHAIN_FILE="$FFBUILD_CMAKE_TOOLCHAIN"
     )
 
