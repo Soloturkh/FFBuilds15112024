@@ -1,8 +1,8 @@
 #!/bin/bash
 
 SCRIPT_REPO="https://github.com/opencv/opencv.git"
-SCRIPT_COMMIT="5.x"
-SCRIPT_TAGFILTER="5.x"
+SCRIPT_COMMIT="4.x"
+SCRIPT_TAGFILTER="4.x"
 
 ffbuild_enabled() {
     # Burada özel bir kontrol yapılmaz, her hedefe uygun destek sağlanır.
@@ -16,15 +16,6 @@ ffbuild_dockerdl() {
 }
 
 ffbuild_dockerbuild() {
-	echo "Bağımlılıklar kuruluyor..."
-	apt-get update && apt-get install -y --no-install-recommends \
-			build-essential cmake pkg-config wget unzip \
-			libjpeg-turbo8-dev libpng-dev libtiff-dev \
-			libavcodec-dev libavformat-dev libswscale-dev \
-			libxvidcore-dev libx264-dev libgtk-3-dev libatlas-base-dev \
-			gfortran python3-dev python3-numpy libfreetype6-dev \
-			libharfbuzz-dev libcurl4-openssl-dev libssl-dev && \
-			rm -rf /var/lib/apt/lists/*
     # OpenCV için yapılandırma seçeneklerini belirleyelim
     local myconf=(
         -D CMAKE_BUILD_TYPE=Release
@@ -45,26 +36,34 @@ ffbuild_dockerbuild() {
     )
 
     # Platform bazlı hedef yapılandırmaları ekleyelim
-    case "$TARGET" in
-        win64|win32)
-            myconf+=(
-                -DCMAKE_SYSTEM_NAME=Windows
-                -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-                -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-            )
-            ;;
-        linux64|linuxarm64)
-            myconf+=(
-                -DCMAKE_SYSTEM_NAME=Linux
-                -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-                -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-            )
-            ;;
-        *)
-            echo "Unknown target: $TARGET"
-            return 1
-            ;;
-    esac
+    if [[ $TARGET == win64 ]]; then
+        myconf+=(
+            -DCMAKE_SYSTEM_NAME=Windows
+            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
+        )
+    elif [[ $TARGET == win32 ]]; then
+        myconf+=(
+            -DCMAKE_SYSTEM_NAME=Windows
+            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
+        )
+    elif [[ $TARGET == linux64 ]]; then
+        myconf+=(
+            -DCMAKE_SYSTEM_NAME=Linux
+            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
+        )
+    elif [[ $TARGET == linuxarm64 ]]; then
+        myconf+=(
+            -DCMAKE_SYSTEM_NAME=Linux
+            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
+            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
+        )
+    else
+        echo "Unknown target: $TARGET"
+        return -1
+    fi
 
     # Derleme ayarları
     export CFLAGS="$CFLAGS -fno-strict-aliasing"
@@ -75,22 +74,6 @@ ffbuild_dockerbuild() {
     export CXX="${CXX/${FFBUILD_CROSS_PREFIX}/}"
     export AR="${AR/${FFBUILD_CROSS_PREFIX}/}"
     export RANLIB="${RANLIB/${FFBUILD_CROSS_PREFIX}/}"
-
-    # OpenCV için pkg-config desteği ekliyoruz
-    PKG_CONFIG_PATH="$FFBUILD_PREFIX/lib/pkgconfig"
-    mkdir -p "$PKG_CONFIG_PATH"
-    cat > "$PKG_CONFIG_PATH/opencv.pc" <<EOF
-prefix=$FFBUILD_PREFIX
-exec_prefix=\${prefix}
-libdir=\${exec_prefix}/lib
-includedir=\${prefix}/include
-
-Name: OpenCV
-Description: OpenCV - Open Source Computer Vision Library
-Version: 5.x
-Cflags: -I\${includedir}
-Libs: -L\${libdir} -lopencv_core -lopencv_imgproc -lopencv_highgui
-EOF
 
     # Build dizini oluştur
     mkdir -p build
