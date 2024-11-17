@@ -43,9 +43,9 @@ ffbuild_dockerbuild() {
     )
 	
 	# Derleme ayarları
-    export CFLAGS="$CFLAGS -fno-strict-aliasing"
-    export CXXFLAGS="$CXXFLAGS -fno-strict-aliasing"
-
+    export CFLAGS="-I$FFBUILD_PREFIX/include/opencv4"
+    export CXXFLAGS="-I$FFBUILD_PREFIX/include/opencv4"
+	export LDFLAGS="-L$FFBUILD_PREFIX/lib"
     # OpenCV derleme için uygun C ve C++ derleyicilerini ayarlayalım
     export CC="${CC/${FFBUILD_CROSS_PREFIX}/}"
     export CXX="${CXX/${FFBUILD_CROSS_PREFIX}/}"
@@ -83,6 +83,7 @@ ffbuild_dockerbuild() {
         echo "Libs.private: -lole32 -lshlwapi -lcfgmgr32" >> opencv.pc
     fi
 
+    cp opencv.pc "$FFBUILD_PREFIX"/opencv.pc
     cp opencv.pc "$FFBUILD_PREFIX"/lib/pkgconfig/opencv.pc
     mv opencv.pc "$FFBUILD_PREFIX"/lib/pkgconfig/opencv4.pc
 }
