@@ -22,7 +22,7 @@ ffbuild_dockerbuild() {
         libjpeg-turbo8-dev libpng-dev libtiff-dev \
         libavcodec-dev libavformat-dev libswscale-dev \
         libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev \
-        gfortran python3-dev python3-numpy
+        gfortran python3-dev python3-numpy libopencv-dev
 
     # Derleme seçeneklerini tanımla
     local myconf=(
@@ -68,11 +68,12 @@ ffbuild_dockerbuild() {
 		echo "Libs.private: -ldl -lm -lpthread -lrt" >> opencv.pc
 		echo "Cflags: -I\${includedir}" >> opencv.pc
     elif [[ $TARGET == win* ]]; then
-        # echo "Libs: -L\${libdir} -l:opencv.a" >> opencv.pc
-        # echo "Libs.private: -lole32 -lshlwapi -lcfgmgr32" >> opencv.pc
+        echo "Libs: -L\${libdir} -l:opencv.a" >> opencv.pc
+        echo "Libs.private: -lole32 -lshlwapi -lcfgmgr32" >> opencv.pc
     fi
 
-    mv opencv.pc "$FFBUILD_PREFIX"/lib/pkgconfig/opencv.pc
+    cp opencv.pc "$FFBUILD_PREFIX"/lib/pkgconfig/opencv.pc
+    mv opencv.pc "$FFBUILD_PREFIX"/lib/pkgconfig/opencv4.pc
 	
     # Build dizini oluştur
     mkdir -p build
