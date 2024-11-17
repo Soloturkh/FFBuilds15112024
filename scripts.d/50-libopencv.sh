@@ -68,8 +68,8 @@ ffbuild_dockerbuild() {
 		echo "Libs.private: -ldl -lm -lpthread -lrt" >> opencv.pc
 		echo "Cflags: -I\${includedir}" >> opencv.pc
     elif [[ $TARGET == win* ]]; then
-        echo "Libs: -L\${libdir} -l:opencv.a" >> opencv.pc
-        echo "Libs.private: -lole32 -lshlwapi -lcfgmgr32" >> opencv.pc
+        # echo "Libs: -L\${libdir} -l:opencv.a" >> opencv.pc
+        # echo "Libs.private: -lole32 -lshlwapi -lcfgmgr32" >> opencv.pc
     fi
 
     mv opencv.pc "$FFBUILD_PREFIX"/lib/pkgconfig/opencv.pc
