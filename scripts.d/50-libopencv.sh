@@ -52,8 +52,19 @@ ffbuild_dockerbuild() {
     export AR="${AR/${FFBUILD_CROSS_PREFIX}/}"
     export RANLIB="${RANLIB/${FFBUILD_CROSS_PREFIX}/}"
 
+    # Build dizini oluştur
+    mkdir -p build
+    cd build
+
+    # CMake ile yapılandırma işlemi
+    cmake .. "${myconf[@]}"
+
+    # Derleme ve yükleme işlemleri
+    make -j$(nproc)
+    make install
+
     # OpenCV için pkg-config desteği ekliyoruz
-	mkdir -p "$FFBUILD_PREFIX/lib/pkgconfig"
+    mkdir -p "$FFBUILD_PREFIX/lib/pkgconfig"
     echo "prefix=$FFBUILD_PREFIX" > opencv.pc
     echo "exec_prefix=\${prefix}" >> opencv.pc
     echo "libdir=\${exec_prefix}/lib" >> opencv.pc
@@ -74,17 +85,6 @@ ffbuild_dockerbuild() {
 
     cp opencv.pc "$FFBUILD_PREFIX"/lib/pkgconfig/opencv.pc
     mv opencv.pc "$FFBUILD_PREFIX"/lib/pkgconfig/opencv4.pc
-	
-    # Build dizini oluştur
-    mkdir -p build
-    cd build
-
-    # CMake ile yapılandırma işlemi
-    cmake .. "${myconf[@]}"
-
-    # Derleme ve yükleme işlemleri
-    make -j$(nproc)
-    make install
 }
 
 ffbuild_configure() {
