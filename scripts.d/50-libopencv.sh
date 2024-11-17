@@ -16,7 +16,18 @@ ffbuild_dockerdl() {
 }
 
 ffbuild_dockerbuild() {
-    # OpenCV için yapılandırma seçeneklerini belirleyelim
+    # Gerekli bağımlılıkları kur
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake pkg-config wget unzip \
+        libjpeg-turbo8-dev libpng-dev libtiff-dev \
+        libavcodec-dev libavformat-dev libswscale-dev \
+        libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev \
+        gfortran python3-dev python3-numpy
+
+    # `pkg-config` dosyasını oluştur
+    ffbuild_generate_pkgconfig
+
+    # Derleme seçeneklerini tanımla
     local myconf=(
         -D CMAKE_BUILD_TYPE=Release
         -D CMAKE_INSTALL_PREFIX="$FFBUILD_PREFIX"
@@ -30,42 +41,11 @@ ffbuild_dockerbuild() {
         -D WITH_PROTOBUF=OFF
         -D ENABLE_CXX11=ON
         -D BUILD_PKG_CONFIG=ON
-        -D OPENCV_ENABLE_PKG_CONFIG=ON  # pkg-config desteğini etkinleştiriyoruz
-        -D OPENCV_GENERATE_PKGCONFIG=ON  # opencv.pc dosyasının oluşturulmasını sağlıyoruz
-        -D CMAKE_TOOLCHAIN_FILE="$FFBUILD_CMAKE_TOOLCHAIN"
+        -D OPENCV_ENABLE_PKG_CONFIG=ON
+        -D OPENCV_GENERATE_PKGCONFIG=ON
     )
-
-    # Platform bazlı hedef yapılandırmaları ekleyelim
-    if [[ $TARGET == win64 ]]; then
-        myconf+=(
-            -DCMAKE_SYSTEM_NAME=Windows
-            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-        )
-    elif [[ $TARGET == win32 ]]; then
-        myconf+=(
-            -DCMAKE_SYSTEM_NAME=Windows
-            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-        )
-    elif [[ $TARGET == linux64 ]]; then
-        myconf+=(
-            -DCMAKE_SYSTEM_NAME=Linux
-            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-        )
-    elif [[ $TARGET == linuxarm64 ]]; then
-        myconf+=(
-            -DCMAKE_SYSTEM_NAME=Linux
-            -DCMAKE_C_COMPILER="$FFBUILD_TOOLCHAIN/gcc"
-            -DCMAKE_CXX_COMPILER="$FFBUILD_TOOLCHAIN/g++"
-        )
-    else
-        echo "Unknown target: $TARGET"
-        return -1
-    fi
-
-    # Derleme ayarları
+	
+	# Derleme ayarları
     export CFLAGS="$CFLAGS -fno-strict-aliasing"
     export CXXFLAGS="$CXXFLAGS -fno-strict-aliasing"
 
@@ -74,6 +54,28 @@ ffbuild_dockerbuild() {
     export CXX="${CXX/${FFBUILD_CROSS_PREFIX}/}"
     export AR="${AR/${FFBUILD_CROSS_PREFIX}/}"
     export RANLIB="${RANLIB/${FFBUILD_CROSS_PREFIX}/}"
+
+    # OpenCV için pkg-config desteği ekliyoruz
+    mkdir -p "$FFBUILD_PREFIX/lib/pkgconfig"
+    echo "prefix=$FFBUILD_PREFIX" > "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "exec_prefix=\${prefix}" >> "$FFBUILD_PREFIX"
+    echo "libdir=\${exec_prefix}/lib" >> "$FFBUILD_PREFIX/lib"
+    echo "includedir=\${prefix}/include" >> "$FFBUILD_PREFIX/include/opencv4"
+    echo >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "Name: OpenCV" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "Description: OpenCV - Open Source Computer Vision Library" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "Version: 9999" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    echo "Cflags: -I\${includedir}" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+
+    # Platform bazlı linkleme ayarları
+    if [[ $TARGET == linux* ]]; then
+        echo "Libs: -L\${libdir} -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_objdetect -lopencv_video -lopencv_calib3d -lopencv_features2d -lopencv_dnn -lopencv_ml -lopencv_stitching -lopencv_photo -lopencv_flann" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+		echo "Libs.private: -ldl -lm -lpthread -lrt" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+		echo "Cflags: -I\$\"$FFBUILD_PREFIX/include/opencv4" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    elif [[ $TARGET == win* ]]; then
+        echo "Libs: -L\${libdir} -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_objdetect -lopencv_video -lopencv_calib3d -lopencv_features2d -lopencv_dnn -lopencv_ml -lopencv_stitching -lopencv_photo -lopencv_flann" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+        echo "Libs.private: -l:opencv_core.a -l:opencv_imgproc.a -l:opencv_highgui.a -l:opencv_videoio.a -l:opencv_imgcodecs.a -l:opencv_objdetect.a -l:opencv_video.a -l:opencv_calib3d.a -l:opencv_features2d.a -l:opencv_dnn.a -l:opencv_ml.a -l:opencv_stitching.a -l:opencv_photo.a -l:opencv_flann.a" >> "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"
+    fi
 
     # Build dizini oluştur
     mkdir -p build
