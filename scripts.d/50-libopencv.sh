@@ -13,26 +13,14 @@ ffbuild_enabled() {
 }
 
 ffbuild_dockerdl() {
-    default_dl headers
-    #echo "git-mini-clone \"$SCRIPT_REPO\" \"$SCRIPT_COMMIT\" loader"
-    #echo "git-mini-clone \"$SCRIPT_REPO2\" \"$SCRIPT_COMMIT2\" loader"
-    #echo "git clone \"$SCRIPT_REPO\" . && git checkout \"$SCRIPT_COMMIT\""
-    #echo "git clone \"$SCRIPT_REPO2\" . && git checkout \"$SCRIPT_COMMIT2\""
-    # OpenCV indir ve belirli commit'e checkout yap
-	WORKDIR=$(mktemp -d)
-	trap 'rm -rf "$WORKDIR"' EXIT
-	
-	# OpenCV indir
-	echo "Cloning OpenCV repository..."
-	mkdir -p "$WORKDIR/opencv"
-	git clone --depth=1 --branch "$SCRIPT_COMMIT" "$SCRIPT_REPO" "$WORKDIR/opencv"
-	
-	# OpenCV contrib indir
-	echo "Cloning OpenCV Contrib repository..."
-	mkdir -p "$WORKDIR/opencv_contrib"
-	git clone --depth=1 --branch "$SCRIPT_COMMIT2" "$SCRIPT_REPO2" "$WORKDIR/opencv_contrib"
-	
-	echo "Repositories cloned successfully into $WORKDIR"
+    default_dl .
+    echo "git submodule update --init --recursive --depth=1"
+
+    SCRIPT_REPO="https://github.com/opencv/opencv_contrib.git"
+    SCRIPT_COMMIT="1ed3dd2c53888e3289afdb22ec4e9ebbff3dba87"
+
+    default_dl .
+    echo "git submodule update --init --recursive --depth=1"
 }
 
 ffbuild_dockerbuild() {
