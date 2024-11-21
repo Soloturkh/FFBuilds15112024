@@ -9,11 +9,11 @@ ffbuild_enabled() {
 }
 
 ffbuild_dockerdl() {
-	default_dl .
+    default_dl .
     echo "git submodule update --init --recursive --depth=1"
-	if [ ! -d "opencv_contrib" ]; then
-		echo "git clone --branch \${OPENCV_VERSION} https://github.com/opencv/opencv_contrib.git"
-	fi
+    if [ ! -d "opencv_contrib" ]; then
+	echo "git clone --branch \${OPENCV_VERSION} https://github.com/opencv/opencv_contrib.git"
+    fi
 }
 
 ffbuild_dockerbuild() {
@@ -32,7 +32,7 @@ ffbuild_dockerbuild() {
           -DCMAKE_INSTALL_PREFIX="$FFBUILD_PREFIX" \
           -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules \
           -DENABLE_PRECOMPILED_HEADERS=OFF \
-		  -DBUILD_SHARED_LIBS=OFF \
+	  -DBUILD_SHARED_LIBS=OFF \
           -DBUILD_EXAMPLES=OFF \
           -DBUILD_TESTS=OFF \
           -DBUILD_PERF_TESTS=OFF \
