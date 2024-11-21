@@ -21,7 +21,7 @@ ffbuild_dockerdl() {
 }
 
 ffbuild_dockerbuild() {
-    apt update && apt-get install -y --no-install-recommends \
+    sudo apt update && sudo apt install -y --no-install-recommends \
     build-essential cmake git unzip pkg-config \
     libjpeg-dev libpng-dev libtiff-dev \
     libavcodec-dev libavformat-dev libswscale-dev \
@@ -36,7 +36,7 @@ ffbuild_dockerbuild() {
           -DCMAKE_INSTALL_PREFIX="$FFBUILD_PREFIX" \
           -DOPENCV_EXTRA_MODULES_PATH=$FFBUILD_PREFIX/opencv_contrib/modules \
           -DENABLE_PRECOMPILED_HEADERS=OFF \
-	      -DBUILD_SHARED_LIBS=OFF \
+	  -DBUILD_SHARED_LIBS=OFF \
           -DBUILD_EXAMPLES=OFF \
           -DBUILD_TESTS=OFF \
           -DBUILD_PERF_TESTS=OFF \
@@ -66,10 +66,10 @@ Libs: -L\${exec_prefix}/lib -lopencv_gapi -lopencv_stitching -lopencv_aruco -lop
 Libs.private: -L\${exec_prefix}/lib/opencv4/3rdparty -lade -littnotify -llibwebp -llibopenjp2 -lIlmImf -lquirc -L/usr/lib/x86_64-linux-gnu -ljpeg -lpng -ltiff -lz -L/usr/lib/gcc/x86_64-linux-gnu/11 -lgomp -lpthread -lfreetype -lharfbuzz -lIconv::Iconv -ldl -lm -lrt
 Cflags: -I\${includedir}
 EOF
-
+    
     echo "OpenCV versiyonu kontrol ediliyor..."
     pkg-config --modversion opencv4 || echo "PKG_CONFIG_PATH ayarlarını kontrol edin."
-    echo "OpenCV $OPENCV_VERSION başarıyla kuruldu!"
+    echo "OpenCV ${OPENCV_VERSION} başarıyla kuruldu!"
 }
 
 ffbuild_configure() {
