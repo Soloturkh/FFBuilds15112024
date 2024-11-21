@@ -14,10 +14,27 @@ ffbuild_enabled() {
 
 ffbuild_dockerdl() {
     default_dl headers
-    echo "git-mini-clone \"$SCRIPT_REPO\" \"$SCRIPT_COMMIT\" loader"
-    echo "git-mini-clone \"$SCRIPT_REPO2\" \"$SCRIPT_COMMIT2\" loader"
+    #echo "git-mini-clone \"$SCRIPT_REPO\" \"$SCRIPT_COMMIT\" loader"
+    #echo "git-mini-clone \"$SCRIPT_REPO2\" \"$SCRIPT_COMMIT2\" loader"
     #echo "git clone \"$SCRIPT_REPO\" . && git checkout \"$SCRIPT_COMMIT\""
     #echo "git clone \"$SCRIPT_REPO2\" . && git checkout \"$SCRIPT_COMMIT2\""
+    # OpenCV indir ve belirli commit'e checkout yap
+    echo "Cloning OpenCV repository..."
+    git clone --recursive "$SCRIPT_REPO" opencv
+    cd opencv || exit 1
+    echo "Checking out commit $SCRIPT_COMMIT..."
+    git checkout "$SCRIPT_COMMIT"
+    git submodule update --init --recursive
+    cd ..
+    
+    # OpenCV_contrib indir ve belirli commit'e checkout yap
+    echo "Cloning OpenCV Contrib repository..."
+    git clone --recursive "$SCRIPT_REPO2" opencv_contrib
+    cd opencv_contrib || exit 1
+    echo "Checking out commit $SCRIPT_COMMIT2..."
+    git checkout "$SCRIPT_COMMIT2"
+    git submodule update --init --recursive
+    cd ..
 }
 
 ffbuild_dockerbuild() {
