@@ -14,10 +14,10 @@ ffbuild_enabled() {
 
 ffbuild_dockerdl() {
     default_dl headers
-    #echo "git-mini-clone \"$SCRIPT_REPO\" \"$SCRIPT_COMMIT\" loader"
-    #echo "git-mini-clone \"$SCRIPT_REPO2\" \"$SCRIPT_COMMIT2\" loader"
-    echo "git clone \"$SCRIPT_REPO\" . && git checkout \"$SCRIPT_COMMIT\""
-    echo "git clone \"$SCRIPT_REPO2\" . && git checkout \"$SCRIPT_COMMIT2\""
+    echo "git-mini-clone \"$SCRIPT_REPO\" \"$SCRIPT_COMMIT\" loader"
+    echo "git-mini-clone \"$SCRIPT_REPO2\" \"$SCRIPT_COMMIT2\" loader"
+    #echo "git clone \"$SCRIPT_REPO\" . && git checkout \"$SCRIPT_COMMIT\""
+    #echo "git clone \"$SCRIPT_REPO2\" . && git checkout \"$SCRIPT_COMMIT2\""
 }
 
 ffbuild_dockerbuild() {
