@@ -14,13 +14,29 @@ ffbuild_enabled() {
 
 ffbuild_dockerdl() {
     default_dl .
-    echo "git submodule update --init --recursive --depth=1"
-
-    SCRIPT_REPO="https://github.com/opencv/opencv_contrib.git"
-    SCRIPT_COMMIT="1ed3dd2c53888e3289afdb22ec4e9ebbff3dba87"
-
-    default_dl .
-    echo "git submodule update --init --recursive --depth=1"
+	# Ana depo klonlanıyor
+	echo "Cloning main repository..."
+	git clone --recurse-submodules "$SCRIPT_REPO" opencv
+	cd opencv || exit 1
+	
+	# Ana repo belirli bir commit'e çekiliyor
+	echo "Checking out commit $SCRIPT_COMMIT..."
+	git checkout "$SCRIPT_COMMIT"
+	
+	# Alt modüller güncelleniyor
+	echo "Updating submodules..."
+	git submodule sync
+	git submodule update --init --recursive --depth=1
+	
+	# OpenCV contrib alt modülü özel commit'e ayarlanıyor
+	echo "Setting submodule contrib to commit $SCRIPT_COMMIT2..."
+	cd modules/contrib || exit 1
+	git remote set-url origin "$SCRIPT_REPO2"
+	git fetch --depth=1 origin "$SCRIPT_COMMIT2"
+	git checkout "$SCRIPT_COMMIT2"
+	cd ../../
+	
+	echo "Submodules updated successfully."
 }
 
 ffbuild_dockerbuild() {
