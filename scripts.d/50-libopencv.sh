@@ -14,7 +14,13 @@ ffbuild_enabled() {
 
 ffbuild_dockerdl() {
     default_dl .
-    echo "git submodule update --init --recursive --depth=1"
+    if [ ! -d "opencv" ]; then
+    	git clone --branch ${OPENCV_VERSION} https://github.com/opencv/opencv.git
+    fi
+	
+    if [ ! -d "opencv_contrib" ]; then
+        git clone --branch ${OPENCV_VERSION} https://github.com/opencv/opencv_contrib.git
+    fi
 }
 
 ffbuild_dockerbuild() {
