@@ -68,14 +68,8 @@ ffbuild_dockerbuild() {
     echo "OpenCV ${OPENCV_VERSION} başarıyla kuruldu!"
 
     mkdir -p "$FFBUILD_PREFIX"/lib/pkgconfig
-	OPENCV_PC=$(find / -name "opencv4.pc" 2>/dev/null | head -n 1) && \
-	 if [ -f "$OPENCV_PC" ]; then \
-	 	cat "$OPENCV_PC" > "$FFBUILD_PREFIX/lib/pkgconfig/libopencv.pc"; \
-   		cat "$OPENCV_PC" > "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"; \
-	 	cat "$OPENCV_PC" > "$FFBUILD_PREFIX/lib/pkgconfig/opencv4.pc"; \
-	 else \
-	 	echo "opencv4.pc dosyası bulunamadı!" && exit 1; \
-	 fi
+    cp ./unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/
+    cp ./unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/libopencv.pc
 
 }
 
