@@ -49,23 +49,34 @@ ffbuild_dockerbuild() {
     make install
     ldconfig
 
-#cat <<EOF >opencv4.pc
-#prefix=$FFBUILD_PREFIX
-#exec_prefix=\${prefix}
-#libdir=\${exec_prefix}/lib
-#includedir=\${prefix}/include/opencv4
-#
-#Name: OpenCV
-#Description: Open Source Computer Vision Library
-#Version: $OPENCV_VERSION
-#Libs: -L\${exec_prefix}/lib -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_mcc -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_highgui -lopencv_datasets -lopencv_text -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_wechat_qrcode -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_dnn -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core
-#Libs.private: -L\${exec_prefix}/lib/opencv4/3rdparty -lade -littnotify -llibwebp -llibopenjp2 -lIlmImf -lquirc -L/usr/lib/x86_64-linux-gnu -ljpeg -lpng -ltiff -lz -L/usr/lib/gcc/x86_64-linux-gnu/11 -lgomp -lpthread -lfreetype -lharfbuzz -lIconv::Iconv -ldl -lm -lrt
-#Cflags: -I\${includedir}
-#EOF
+	#cat <<EOF >opencv4.pc
+	#prefix=$FFBUILD_PREFIX
+	#exec_prefix=\${prefix}
+	#libdir=\${exec_prefix}/lib
+	#includedir=\${prefix}/include/opencv4
+	#
+	#Name: OpenCV
+	#Description: Open Source Computer Vision Library
+	#Version: $OPENCV_VERSION
+	#Libs: -L\${exec_prefix}/lib -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_mcc -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_highgui -lopencv_datasets -lopencv_text -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_wechat_qrcode -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_dnn -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core
+	#Libs.private: -L\${exec_prefix}/lib/opencv4/3rdparty -lade -littnotify -llibwebp -llibopenjp2 -lIlmImf -lquirc -L/usr/lib/x86_64-linux-gnu -ljpeg -lpng -ltiff -lz -L/usr/lib/gcc/x86_64-linux-gnu/11 -lgomp -lpthread -lfreetype -lharfbuzz -lIconv::Iconv -ldl -lm -lrt
+	#Cflags: -I\${includedir}
+	#EOF
     
     echo "OpenCV versiyonu kontrol ediliyor..."
-    pkg-config --modversion opencv4 || echo "PKG_CONFIG_PATH ayarlarını kontrol edin."
+    echo "pkg-config --modversion opencv4" || echo "PKG_CONFIG_PATH ayarlarını kontrol edin."
     echo "OpenCV ${OPENCV_VERSION} başarıyla kuruldu!"
+
+    mkdir -p "$FFBUILD_PREFIX"/lib/pkgconfig
+	OPENCV_PC=$(find / -name "opencv4.pc" 2>/dev/null | head -n 1) && \
+	 if [ -f "$OPENCV_PC" ]; then \
+	 	cat "$OPENCV_PC" > "$FFBUILD_PREFIX/lib/pkgconfig/libopencv.pc"; \
+   		cat "$OPENCV_PC" > "$FFBUILD_PREFIX/lib/pkgconfig/opencv.pc"; \
+	 	cat "$OPENCV_PC" > "$FFBUILD_PREFIX/lib/pkgconfig/opencv4.pc"; \
+	 else \
+	 	echo "opencv4.pc dosyası bulunamadı!" && exit 1; \
+	 fi
+
 }
 
 ffbuild_configure() {
