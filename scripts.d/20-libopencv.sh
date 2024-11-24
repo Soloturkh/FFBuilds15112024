@@ -32,7 +32,7 @@ ffbuild_dockerbuild() {
           -DCMAKE_INSTALL_PREFIX="$FFBUILD_PREFIX" \
           -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules \
           -DENABLE_PRECOMPILED_HEADERS=OFF \
-		      -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_SHARED_LIBS=OFF \
           -DBUILD_EXAMPLES=OFF \
           -DBUILD_TESTS=OFF \
           -DBUILD_PERF_TESTS=OFF \
