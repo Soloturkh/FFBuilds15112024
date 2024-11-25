@@ -70,6 +70,8 @@ ffbuild_dockerbuild() {
     mkdir -p "$FFBUILD_PREFIX"/lib/pkgconfig
     cp ./unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/
     cp ./unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/libopencv.pc
+    cp ../unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/
+    cp ../unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/libopencv.pc
 
 }
 
