@@ -64,14 +64,12 @@ ffbuild_dockerbuild() {
 	#EOF
     
     echo "OpenCV versiyonu kontrol ediliyor..."
-    echo "pkg-config --modversion opencv4" || echo "PKG_CONFIG_PATH ayarlarını kontrol edin."
+    pkg-config --modversion opencv4 || echo "PKG_CONFIG_PATH ayarlarını kontrol edin."
     echo "OpenCV ${OPENCV_VERSION} başarıyla kuruldu!"
 
     mkdir -p "$FFBUILD_PREFIX"/lib/pkgconfig
     cp ./unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/
     cp ./unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/libopencv.pc
-    cp ../unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/
-    cp ../unix-install/opencv4.pc "$FFBUILD_PREFIX"/lib/pkgconfig/libopencv.pc
 
 }
 
