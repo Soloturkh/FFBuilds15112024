@@ -35,3 +35,6 @@ sudo systemctl start docker
 sudo systemctl enable docker
 sudo apt install -y protobuf-compiler libprotobuf-dev
 sudo apt install -y build-essential cmake git libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev
+
+docker login -u mail
+pass
