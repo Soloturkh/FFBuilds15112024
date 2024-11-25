@@ -33,7 +33,6 @@ ffbuild_dockerbuild() {
           -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules \
           -DENABLE_PRECOMPILED_HEADERS=OFF \
           -DBUILD_SHARED_LIBS=OFF \
-          -DBUILD_EXAMPLES=OFF \
           -DBUILD_TESTS=OFF \
           -DBUILD_PERF_TESTS=OFF \
           -DWITH_FFMPEG=ON \
@@ -44,7 +43,7 @@ ffbuild_dockerbuild() {
           -DBUILD_PKG_CONFIG=ON \
           -DOPENCV_ENABLE_PKG_CONFIG=ON \
           -DOPENCV_GENERATE_PKGCONFIG=ON \
-          -DBUILD_EXAMPLES=ON ..
+          -DBUILD_EXAMPLES=OFF ..
     make -j$(nproc)
     make install
     ldconfig
